@@ -1,1 +1,0 @@
-Demo function that returns a plain-text status line (Python version and a humanize-formatted size)

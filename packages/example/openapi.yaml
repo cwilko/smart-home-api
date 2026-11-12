@@ -1,4 +1,4 @@
-# OpenAPI document for the slugifier function. A plain Fission function has no HTTP contract of its own: the method and
+# OpenAPI document for the example function. A plain Fission function has no HTTP contract of its own: the method and
 # path come from the HTTPTrigger in .github/fission/package.yaml.tmpl, so this spec lives next to the function and is
 # published with each release as the <name>-openapi.yaml asset (the trigger's catalog.squirrelhome.co.uk/openapi
 # annotation holds its URL).
@@ -10,7 +10,7 @@ info:
   title: __NAME__
   version: 1.0.0
   description: >
-    Demo function deployed from a pre-built package. Turns the text query parameter into a URL slug using the vendored
+    Example function deployed from a pre-built package. Turns the text query parameter into a URL slug using the vendored
     python-slugify library and returns both as JSON. The function scales to zero when idle, so the first request after a
     quiet period is a cold start of about 2-3 seconds.
 

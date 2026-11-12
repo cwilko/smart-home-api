@@ -1,0 +1,1 @@
+JSON catalog of the endpoints that Fission fronts, built from the HTTPTrigger annotations

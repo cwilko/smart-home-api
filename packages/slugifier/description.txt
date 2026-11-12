@@ -1,1 +1,0 @@
-Demo function that turns the text query parameter into a URL slug and returns it as JSON

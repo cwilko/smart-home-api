@@ -1,0 +1,109 @@
+# OpenAPI document for the catalog function. A plain Fission function has no HTTP contract of its own: the method and
+# path come from the HTTPTrigger in .github/fission/package.yaml.tmpl, so this spec lives next to the function and is
+# published with each release as the catalog-openapi.yaml asset (the trigger's catalog.squirrelhome.co.uk/openapi
+# annotation holds its URL). __NAME__ and __SERVER_URL__ are filled in by .github/scripts/build-fission-package.sh, so
+# this file is a template and not valid OpenAPI until rendered.
+openapi: 3.0.3
+
+info:
+  title: __NAME__
+  version: 1.0.0
+  description: >
+    Catalog of the HTTP endpoints that Fission fronts, built on each request from the HTTPTrigger and Function resources
+    in the services namespace. Intended for people and AI agents that need to discover what is available and how to call
+    it. The function scales to zero when idle, so the first request after a quiet period is a cold start of about 2-3
+    seconds.
+
+servers:
+  - url: __SERVER_URL__
+
+paths:
+  /__NAME__:
+    get:
+      operationId: getCatalog
+      summary: List the endpoints that Fission fronts
+      description: Takes no parameters and no body.
+      responses:
+        "200":
+          description: The catalog.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [about, generated_at, base_url, endpoints]
+                properties:
+                  about:
+                    type: string
+                    description: What the document is and how to read it.
+                  generated_at:
+                    type: string
+                    format: date-time
+                  base_url:
+                    type: string
+                    description: Public host that endpoint paths are appended to.
+                  endpoints:
+                    type: array
+                    description: One entry per HTTPTrigger, sorted by path.
+                    items:
+                      type: object
+                      required: [name, namespace, url, path, match, methods, function, problems]
+                      properties:
+                        name:
+                          type: string
+                          description: Name of the HTTPTrigger.
+                        namespace:
+                          type: string
+                        url:
+                          type: string
+                          description: Full public URL (base_url plus path).
+                        path:
+                          type: string
+                        match:
+                          type: string
+                          enum: [exact, prefix]
+                          description: Whether path is an exact path or a prefix.
+                        methods:
+                          type: array
+                          items:
+                            type: string
+                        kind:
+                          type: string
+                          nullable: true
+                          enum: [rest, mcp, webhook, other]
+                          description: From the kind annotation.
+                        description:
+                          type: string
+                          nullable: true
+                          description: From the description annotation.
+                        openapi:
+                          type: string
+                          nullable: true
+                          description: URL of the OpenAPI document (annotation, used for kind rest).
+                        usage:
+                          type: string
+                          nullable: true
+                          description: Markdown note on how to call the endpoint (annotation, used for the other kinds).
+                        function:
+                          type: object
+                          nullable: true
+                          description: The Function behind the trigger; null when it could not be resolved (see problems).
+                          properties:
+                            name:
+                              type: string
+                            executor:
+                              type: string
+                              description: poolmgr, newdeploy or container.
+                            min_scale:
+                              type: integer
+                              nullable: true
+                              description: 0 means the function scales to zero when idle.
+                            max_scale:
+                              type: integer
+                              nullable: true
+                            streaming:
+                              type: boolean
+                        problems:
+                          type: array
+                          description: Missing or inconsistent metadata for this entry; empty when the entry is complete.
+                          items:
+                            type: string

@@ -1,0 +1,5 @@
+  # Mounted into the runtime container at /secrets/services/fission-catalog-token/ (token, ca.crt, namespace). The
+  # Secret and its RBAC live in smart-home-config, workloads/fission/workloads/catalog/rbac.yaml.
+  secrets:
+  - name: fission-catalog-token
+    namespace: services

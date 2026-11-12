@@ -8,8 +8,8 @@ Each package is a directory under `packages/`:
 
 | Package | Route | What it does | Dependencies |
 |---|---|---|---|
-| `test-package` | `GET /test-package` | returns a plain-text status line (Python version and a humanize-formatted size) | `humanize` |
-| `slugifier` | `GET /slugifier?text=...` | returns `{"text", "slug"}` as JSON, 400 if `text` is missing; shows reading a query parameter and returning JSON | `python-slugify`, `text-unidecode` |
+| `catalog` | `GET /catalog` | the real catalog service: lists the endpoints Fission fronts as JSON, built from the HTTPTrigger and Function resources in the cluster (convention in smart-home-config, `workloads/fission/README.md`) | none (standard library; `flask` comes from Fission's python environment) |
+| `example` | `GET /example?text=...` | returns `{"text", "slug"}` as JSON, 400 if `text` is missing; shows reading a query parameter and returning JSON | `python-slugify`, `text-unidecode` |
 
 A package directory holds:
 
@@ -17,14 +17,17 @@ A package directory holds:
 - `requirements.txt` - dependencies, vendored into the archive at build time (pure python only)
 - `openapi.yaml` - template for the endpoint's OpenAPI document (`__NAME__` and `__SERVER_URL__` are filled in at release)
 - `description.txt` - one line used as the catalog description annotation on the HTTPTrigger (avoid the characters `|`, `&` and backslash)
+- `function-extras.yaml` (optional) - YAML added to the Function's `spec`, for settings the template doesn't cover. `catalog` uses it to mount its token Secret under `secrets:`
 
 The directory name is the package name: it becomes the Fission Package, Function and HTTPTrigger name, and the route `/<name>`.
 
 ### Adding a package
 
-1. Create `packages/<name>/` with the four files above (copy an existing package as a starting point).
+1. Create `packages/<name>/` with the files above (copy an existing package as a starting point).
 2. Run `./build.sh v0.0.0-local <name>` to check it builds.
 3. Push to `main`. The next release includes it automatically; there is nothing to register.
+
+`catalog` is a real service; `example` is a template to copy when adding a new one. Its cluster-side pieces (ServiceAccount, token Secret and RBAC) stay in smart-home-config, `workloads/fission/workloads/catalog/rbac.yaml`, and must be applied before the Function that mounts them.
 
 ## Layout
 
@@ -60,14 +63,14 @@ The URL is the release asset, so the repository has to be public for the cluster
 
 ## Development workflow
 
-1. Edit and try it locally: run `main()` directly, or `./build.sh v0.0.0-local <name>` and import `main` from the unpacked zip. (`slugifier` imports `flask`, which Fission's python environment provides, so install it locally to run that one.)
+1. Edit and try it locally: run `main()` directly, or `./build.sh v0.0.0-local <name>` and import `main` from the unpacked zip. (`example` imports `flask`, which Fission's python environment provides, so install it locally to run that one.)
 2. Push to `main`. About a minute later there is a `dev-<sha>` pre-release.
 3. Pull the `<name>-package.yaml` you want and apply it:
 
    ```bash
    gh release list --repo cwilko/smart-home-api             # newest first; dev builds are marked Pre-release
-   gh release download dev-1a2b3c4 --repo cwilko/smart-home-api --pattern 'slugifier-package.yaml' --output slugifier-package.yaml
-   kubectl apply -f slugifier-package.yaml
+   gh release download dev-1a2b3c4 --repo cwilko/smart-home-api --pattern 'example-package.yaml' --output example-package.yaml
+   kubectl apply -f example-package.yaml
    ```
 
 4. When it's good, tag a real release: `git tag v0.2.0 && git push origin v0.2.0`.
@@ -84,7 +87,7 @@ To prune by hand, or to keep a different number: `.github/scripts/prune-dev-rele
 
 ```bash
 ./build.sh v0.0.0-local            # all packages
-./build.sh v0.0.0-local slugifier  # just one
+./build.sh v0.0.0-local example  # just one
 ```
 
 Needs `python` (with `pip`), `zip` and `shasum`. To also render the Fission manifests for those builds:
