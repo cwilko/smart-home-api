@@ -1,6 +1,6 @@
 # OpenAPI document for the test-package function. A plain Fission function has no HTTP contract of its own: the method and
-# path come from the HTTPTrigger in package.yaml.tmpl, so this spec lives next to that template and is published with each
-# release as the openapi.yaml asset (the trigger's catalog.squirrelhome.co.uk/openapi annotation holds its URL).
+# path come from the HTTPTrigger in .github/fission/package.yaml.tmpl, so this spec lives next to the function and is published with each
+# release as the <name>-openapi.yaml asset (the trigger's catalog.squirrelhome.co.uk/openapi annotation holds its URL).
 # __NAME__ and __SERVER_URL__ are filled in by .github/scripts/build-fission-package.sh (the server URL is API_BASE_URL,
 # set in release.yml), so this file is a template and not valid OpenAPI until rendered.
 openapi: 3.0.3

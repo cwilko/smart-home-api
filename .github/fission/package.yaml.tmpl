@@ -1,5 +1,5 @@
 # Fission resources for this package. .github/scripts/build-fission-package.sh fills in the placeholders; the release
-# workflow attaches the result to each GitHub release as package.yaml.
+# workflow attaches the result to each GitHub release as <name>-package.yaml.
 apiVersion: fission.io/v1
 kind: Package
 metadata:
@@ -36,7 +36,7 @@ spec:
     ExecutionStrategy:
       ExecutorType: newdeploy
       MinScale: 0
-      MaxScale: 2
+      MaxScale: 1
       SpecializationTimeout: 120
 ---
 apiVersion: fission.io/v1
@@ -44,9 +44,9 @@ kind: HTTPTrigger
 metadata:
   name: __NAME__
   namespace: __NAMESPACE__
-  # Endpoint metadata read by the catalog on the cluster; the openapi asset is published with the same release
+  # Endpoint metadata read by the catalog on the cluster; the <name>-openapi.yaml asset is published with the same release
   annotations:
-    catalog.squirrelhome.co.uk/description: Demo function that returns a plain-text status line (Python version and a humanize-formatted size)
+    catalog.squirrelhome.co.uk/description: __DESCRIPTION__
     catalog.squirrelhome.co.uk/kind: rest
     catalog.squirrelhome.co.uk/openapi: __OPENAPI_URL__
 spec:
